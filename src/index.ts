@@ -37,6 +37,9 @@ export { ToolsTable } from "./components/tools/tools-table";
 export { ToolFormDialog } from "./components/tools/tool-form-dialog";
 export { ToolCredentialsForm } from "./components/tools/tool-credentials-form";
 export { Sortable, SortableContent, SortableItem, SortableItemHandle, SortableOverlay } from "./components/ui/sortable";
+export { AgentConversationsPanel } from "./components/conversations/agent-conversations-panel";
+export { AgentConversationsTable } from "./components/conversations/agent-conversations-table";
+export { ConversationView } from "./components/conversations/conversation-view";
 
 // Page Compositions
 export * from "./pages";

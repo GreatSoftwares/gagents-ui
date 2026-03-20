@@ -6,20 +6,19 @@ import { Badge, Button, Skeleton } from "@greatapps/greatauth-ui/ui";
 import { EntityAvatar } from "@greatapps/greatauth-ui";
 import { ArrowLeft, Pencil } from "lucide-react";
 import type { GagentsHookConfig } from "../hooks/types";
-import type { Agent } from "../types";
 
 export interface AgentDetailPageProps {
   config: GagentsHookConfig;
   agentId: number;
   onBack?: () => void;
-  renderConversationsTab?: (agent: Agent) => React.ReactNode;
+  renderChatLink?: (inboxId: number) => React.ReactNode;
 }
 
 export function AgentDetailPage({
   config,
   agentId,
   onBack,
-  renderConversationsTab,
+  renderChatLink,
 }: AgentDetailPageProps) {
   const { data: agent, isLoading } = useAgent(config, agentId);
   const [editOpen, setEditOpen] = useState(false);
@@ -95,7 +94,7 @@ export function AgentDetailPage({
       <AgentTabs
         agent={agent}
         config={config}
-        renderConversationsTab={renderConversationsTab}
+        renderChatLink={renderChatLink}
       />
 
       {editOpen && (
