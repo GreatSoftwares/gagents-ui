@@ -9,7 +9,6 @@ export interface Agent {
   id: number;
   id_account: number;
   title: string;
-  prompt: string | null;
   photo: string | null;
   external_token: string | null;
   openai_assistant_id: string | null;

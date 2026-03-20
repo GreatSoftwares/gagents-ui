@@ -10,7 +10,7 @@ import {
   DialogFooter,
   Button,
   Input,
-  Textarea,
+
   Label,
 } from "@greatapps/greatauth-ui/ui";
 import { Loader2 } from "lucide-react";
@@ -34,7 +34,6 @@ export function AgentFormDialog({
   const updateAgent = useUpdateAgent(config);
 
   const [title, setTitle] = useState("");
-  const [prompt, setPrompt] = useState("");
   const [photo, setPhoto] = useState("");
   const [delayTyping, setDelayTyping] = useState("");
   const [waitingTime, setWaitingTime] = useState("");
@@ -43,13 +42,11 @@ export function AgentFormDialog({
   useEffect(() => {
     if (agent) {
       setTitle(agent.title);
-      setPrompt(agent.prompt || "");
       setPhoto(agent.photo || "");
       setDelayTyping(agent.delay_typing != null ? String(agent.delay_typing) : "");
       setWaitingTime(agent.waiting_time != null ? String(agent.waiting_time) : "");
     } else {
       setTitle("");
-      setPrompt("");
       setPhoto("");
       setDelayTyping("");
       setWaitingTime("");
@@ -66,7 +63,6 @@ export function AgentFormDialog({
     const body: Record<string, unknown> = {
       title: title.trim(),
     };
-    if (prompt.trim()) body.prompt = prompt.trim();
     if (photo.trim()) body.photo = photo.trim();
     if (delayTyping.trim()) body.delay_typing = Number(delayTyping);
     if (waitingTime.trim()) body.waiting_time = Number(waitingTime);
@@ -114,17 +110,6 @@ export function AgentFormDialog({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Assistente de Agendamento"
               required
-              disabled={isPending}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="agent-prompt">Prompt do Sistema</Label>
-            <Textarea
-              id="agent-prompt"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Instruções para o agente AI..."
-              rows={6}
               disabled={isPending}
             />
           </div>

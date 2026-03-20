@@ -81,15 +81,15 @@ export function createGagentsClient(config: GagentsClientConfig) {
     createAgent: (
       idAccount: number,
       body: Pick<Agent, "title"> &
-        Partial<Pick<Agent, "prompt" | "photo" | "delay_typing" | "waiting_time">>,
+        Partial<Pick<Agent, "photo" | "delay_typing" | "waiting_time">>,
     ) => request<Agent>("POST", idAccount, "agents", body),
 
     updateAgent: (
       idAccount: number,
       id: number,
       body: Partial<
-        Pick<Agent, "title" | "prompt" | "photo" | "delay_typing" | "waiting_time" | "active">
-      >,
+        Pick<Agent, "title" | "photo" | "delay_typing" | "waiting_time" | "active">
+      > & { prompt?: string; change_notes?: string },
     ) => request<Agent>("PUT", idAccount, `agents/${id}`, body),
 
     deleteAgent: (idAccount: number, id: number) =>

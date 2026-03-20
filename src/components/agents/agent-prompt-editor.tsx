@@ -98,18 +98,33 @@ export function AgentPromptEditor({ config, agent }: AgentPromptEditorProps) {
   const { data: agentToolsData } = useAgentTools(config, agent.id);
   const { data: toolsData } = useTools(config);
 
+  const versions = (versionsData?.data || []) as PromptVersion[];
+  const sortedVersions = [...versions].sort(
+    (a, b) => new Date(b.datetime_add).getTime() - new Date(a.datetime_add).getTime(),
+  );
+  const currentVersion = sortedVersions.find((v) => v.is_current) || sortedVersions[0] || null;
+  const currentPromptContent = currentVersion?.prompt_content ?? "";
+
   const [trackedAgentId, setTrackedAgentId] = useState(agent.id);
-  const [promptText, setPromptText] = useState(agent.prompt || "");
+  const [promptText, setPromptText] = useState(currentPromptContent);
+  const [promptInitialized, setPromptInitialized] = useState(false);
   const [changeNotes, setChangeNotes] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [compareVersionId, setCompareVersionId] = useState<number | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Initialize prompt text from current version when data loads
+  if (!promptInitialized && currentPromptContent && !isLoading) {
+    setPromptText(currentPromptContent);
+    setPromptInitialized(true);
+  }
+
   // Reset prompt text when agent changes
   if (trackedAgentId !== agent.id) {
     setTrackedAgentId(agent.id);
-    setPromptText(agent.prompt || "");
+    setPromptText(currentPromptContent);
+    setPromptInitialized(!!currentPromptContent);
     setCompareVersionId(null);
   }
 
@@ -142,13 +157,6 @@ export function AgentPromptEditor({ config, agent }: AgentPromptEditorProps) {
     }
   }
 
-  const versions = versionsData?.data || [];
-  const sortedVersions = [...versions].sort(
-    (a: PromptVersion, b: PromptVersion) =>
-      new Date(b.datetime_add).getTime() - new Date(a.datetime_add).getTime(),
-  );
-
-  const currentVersion = sortedVersions.length > 0 ? sortedVersions[0] : null;
   const compareVersion = sortedVersions.find((v) => v.id === compareVersionId);
 
   // Diff: always compare selected older version against current
