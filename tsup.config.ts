@@ -16,6 +16,11 @@ export default defineConfig({
     "date-fns",
     "sonner",
     "@greatapps/greatauth-ui",
+    "@dnd-kit/core",
+    "@dnd-kit/modifiers",
+    "@dnd-kit/sortable",
+    "@dnd-kit/utilities",
+    "radix-ui",
   ],
   esbuildOptions(options) {
     options.jsx = "automatic";

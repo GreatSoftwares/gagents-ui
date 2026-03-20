@@ -9,22 +9,32 @@
         "tailwind-merge": "^3",
       },
       "devDependencies": {
-        "@greatapps/greatauth-ui": "0.3.7",
+        "@dnd-kit/core": "latest",
+        "@dnd-kit/modifiers": "latest",
+        "@dnd-kit/sortable": "latest",
+        "@dnd-kit/utilities": "latest",
+        "@greatapps/greatauth-ui": "^0.3.9",
         "@tanstack/react-query": "latest",
         "@tanstack/react-table": "latest",
         "@types/react": "latest",
         "@types/react-dom": "latest",
+        "radix-ui": "latest",
         "react": "^19",
         "react-dom": "^19",
         "tsup": "latest",
         "typescript": "^5",
       },
       "peerDependencies": {
-        "@greatapps/greatauth-ui": "*",
+        "@dnd-kit/core": "*",
+        "@dnd-kit/modifiers": "*",
+        "@dnd-kit/sortable": "*",
+        "@dnd-kit/utilities": "*",
+        "@greatapps/greatauth-ui": "^0.3.7",
         "@tanstack/react-query": "^5",
         "@tanstack/react-table": "^8",
         "date-fns": "*",
         "lucide-react": "*",
+        "radix-ui": "*",
         "react": "^19",
         "react-dom": "^19",
         "sonner": "*",
@@ -49,6 +59,16 @@
     "@better-auth/utils": ["@better-auth/utils@0.3.1", "", {}, "sha512-+CGp4UmZSUrHHnpHhLPYu6cV+wSUSvVbZbNykxhUDocpVNTo9uFFxw/NqJlh1iC4wQ9HKKWGCKuZ5wUgS0v6Kg=="],
 
     "@better-fetch/fetch": ["@better-fetch/fetch@1.1.21", "", {}, "sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A=="],
+
+    "@dnd-kit/accessibility": ["@dnd-kit/accessibility@3.1.1", "", { "dependencies": { "tslib": "^2.0.0" }, "peerDependencies": { "react": ">=16.8.0" } }, "sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw=="],
+
+    "@dnd-kit/core": ["@dnd-kit/core@6.3.1", "", { "dependencies": { "@dnd-kit/accessibility": "^3.1.1", "@dnd-kit/utilities": "^3.2.2", "tslib": "^2.0.0" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-xkGBRQQab4RLwgXxoqETICr6S5JlogafbhNsidmrkVv2YRs5MLwpjoF2qpiGjQt8S9AoxtIV603s0GIUpY5eYQ=="],
+
+    "@dnd-kit/modifiers": ["@dnd-kit/modifiers@9.0.0", "", { "dependencies": { "@dnd-kit/utilities": "^3.2.2", "tslib": "^2.0.0" }, "peerDependencies": { "@dnd-kit/core": "^6.3.0", "react": ">=16.8.0" } }, "sha512-ybiLc66qRGuZoC20wdSSG6pDXFikui/dCNGthxv4Ndy8ylErY0N3KVxY2bgo7AWwIbxDmXDg3ylAFmnrjcbVvw=="],
+
+    "@dnd-kit/sortable": ["@dnd-kit/sortable@10.0.0", "", { "dependencies": { "@dnd-kit/utilities": "^3.2.2", "tslib": "^2.0.0" }, "peerDependencies": { "@dnd-kit/core": "^6.3.0", "react": ">=16.8.0" } }, "sha512-+xqhmIIzvAYMGfBYYnbKuNicfSsk4RksY2XdmJhT+HAC01nix6fHCztU68jooFiMUB01Ky3F0FyOvhG/BZrWkg=="],
+
+    "@dnd-kit/utilities": ["@dnd-kit/utilities@3.2.2", "", { "dependencies": { "tslib": "^2.0.0" }, "peerDependencies": { "react": ">=16.8.0" } }, "sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg=="],
 
     "@emnapi/runtime": ["@emnapi/runtime@1.9.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-VYi5+ZVLhpgK4hQ0TAjiQiZ6ol0oe4mBx7mVv7IflsiEp0OWoVsp/+f9Vc1hOhE0TtkORVrI1GvzyreqpgWtkA=="],
 
@@ -112,7 +132,7 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
 
-    "@greatapps/greatauth-ui": ["@greatapps/greatauth-ui@0.3.7", "", { "dependencies": { "class-variance-authority": "^0.7", "clsx": "^2", "tailwind-merge": "^3" }, "peerDependencies": { "better-auth": "^1.4", "cmdk": "^1", "input-otp": "^1.4.2", "lucide-react": "^0.577.0", "next": ">=15", "next-themes": "*", "radix-ui": "^1.4", "react": "^19", "react-dom": "^19", "react-easy-crop": "^5", "sonner": "^2.0.7", "vaul": "^1.1.2" } }, "sha512-a/ZiHz60Q/BeEl9OJu7br31tmPgw8AkTrd1zomaKESbeEmLtXxHh5ZHgFi4g/iwx1iBpt6wJcbujMu1nugxn4w=="],
+    "@greatapps/greatauth-ui": ["@greatapps/greatauth-ui@0.3.9", "", { "dependencies": { "class-variance-authority": "^0.7", "clsx": "^2", "tailwind-merge": "^3" }, "peerDependencies": { "better-auth": "^1.4", "cmdk": "^1", "input-otp": "^1.4.2", "lucide-react": "^0.577.0", "next": ">=15", "next-themes": "*", "radix-ui": "^1.4", "react": "^19", "react-dom": "^19", "react-easy-crop": "^5", "sonner": "^2.0.7", "vaul": "^1.1.2" } }, "sha512-SKBE0CzHA8RacIkfdhJhEzXKybOaVsiwwokHPOE5xEJ4booX+vvalDDqf0nQvf32AkyegCas3gWnKtvmgBd+vg=="],
 
     "@img/colour": ["@img/colour@1.1.0", "", {}, "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ=="],
 
