@@ -337,7 +337,7 @@ export function CapabilitiesTab({ config, agentId }: CapabilitiesTabProps) {
                   </Badge>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pb-3">
+              <AccordionContent className="pb-3 !h-auto">
                 <div className="space-y-1">
                   {cat.modules.map((mod) => {
                     const enabledOps = localState.get(mod.slug);

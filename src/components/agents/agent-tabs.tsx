@@ -3,7 +3,6 @@ import type { GagentsHookConfig } from "../../hooks/types";
 import type { IntegrationCardData } from "../../hooks/use-integrations";
 import type { WizardIntegrationMeta } from "../capabilities/types";
 import type { ConfigOption } from "../capabilities/wizard-steps/config-step";
-import { AgentToolsList } from "./agent-tools-list";
 import { AgentObjectivesList } from "./agent-objectives-list";
 import { AgentPromptEditor } from "./agent-prompt-editor";
 import { AgentConversationsPanel } from "../conversations/agent-conversations-panel";
@@ -14,7 +13,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@greatapps/greatauth-ui/ui";
-import { Wrench, Target, FileText, MessageCircle, Blocks } from "lucide-react";
+import { Target, FileText, MessageCircle, Blocks } from "lucide-react";
 
 interface AgentTabsProps {
   agent: Agent;
@@ -52,10 +51,6 @@ export function AgentTabs({
           <Target aria-hidden="true" className="h-3.5 w-3.5" />
           Objetivos
         </TabsTrigger>
-        <TabsTrigger value="ferramentas" className="flex items-center gap-1.5">
-          <Wrench aria-hidden="true" className="h-3.5 w-3.5" />
-          Ferramentas
-        </TabsTrigger>
         <TabsTrigger value="capacidades" className="flex items-center gap-1.5">
           <Blocks aria-hidden="true" className="h-3.5 w-3.5" />
           Capacidades
@@ -72,10 +67,6 @@ export function AgentTabs({
 
       <TabsContent value="objetivos" className="mt-4">
         <AgentObjectivesList agent={agent} config={config} />
-      </TabsContent>
-
-      <TabsContent value="ferramentas" className="mt-4">
-        <AgentToolsList agent={agent} config={config} />
       </TabsContent>
 
       <TabsContent value="capacidades" className="mt-4">

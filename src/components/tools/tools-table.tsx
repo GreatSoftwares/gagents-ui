@@ -145,8 +145,9 @@ export function ToolsTable({ onEdit, config }: ToolsTableProps) {
   const deleteTool = useDeleteTool(config);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const tools = data?.data || [];
-  const total = data?.total || 0;
+  const rawTools = data?.data || [];
+  const tools = rawTools.filter((t: Tool) => !t.slug?.startsWith("gclinic_"));
+  const total = tools.length;
 
   const columns = useColumns(
     (tool) => onEdit(tool),

@@ -185,7 +185,7 @@ export function ToolCredentialsForm({
   const updateMutation = useUpdateToolCredential(config);
   const deleteMutation = useDeleteToolCredential(config);
   const { data: toolsData } = useTools(config);
-  const tools: Tool[] = toolsData?.data || [];
+  const tools: Tool[] = (toolsData?.data || []).filter((t: Tool) => !t.slug?.startsWith("gclinic_"));
 
   const [search, setSearch] = useState("");
   const [internalCreateOpen, setInternalCreateOpen] = useState(false);
@@ -209,17 +209,31 @@ export function ToolCredentialsForm({
 
   const [removeTarget, setRemoveTarget] = useState<ToolCredential | null>(null);
 
+  // Build a set of internal tool IDs to exclude from credentials display
+  const internalToolIds = useMemo(() => {
+    const allRawTools: Tool[] = toolsData?.data || [];
+    return new Set(
+      allRawTools
+        .filter((t: Tool) => t.slug?.startsWith("gclinic_"))
+        .map((t: Tool) => t.id),
+    );
+  }, [toolsData]);
+
   const filteredCredentials = useMemo(() => {
-    if (!search) return credentials;
+    // Exclude credentials linked to internal gclinic_* tools
+    const visible = credentials.filter(
+      (cred) => !cred.id_tool || !internalToolIds.has(cred.id_tool),
+    );
+    if (!search) return visible;
     const term = search.toLowerCase();
-    return credentials.filter((cred) => {
+    return visible.filter((cred) => {
       const toolName = tools.find((t) => t.id === cred.id_tool)?.name || "";
       return (
         (cred.label || "").toLowerCase().includes(term) ||
         toolName.toLowerCase().includes(term)
       );
     });
-  }, [credentials, search, tools]);
+  }, [credentials, search, tools, internalToolIds]);
 
   const columns = useColumns(
     tools,

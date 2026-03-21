@@ -70,10 +70,15 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
   const allCredentials: ToolCredential[] = credentialsData?.data || [];
 
   const agentTools = agentToolsData?.data || [];
-  const allTools = allToolsData?.data || [];
+  const allTools = (allToolsData?.data || []).filter((t: Tool) => !t.slug?.startsWith("gclinic_"));
   const assignedToolIds = new Set(agentTools.map((at) => at.id_tool));
-  const availableTools = allTools.filter((t) => !assignedToolIds.has(t.id));
-  const filteredAvailable = availableTools.filter((t) =>
+  // Filter out internal gclinic_* tools from assigned tools display
+  const visibleAgentTools = agentTools.filter((at) => {
+    const tool = allTools.find((t: Tool) => t.id === at.id_tool);
+    return !tool || !tool.slug?.startsWith("gclinic_");
+  });
+  const availableTools = allTools.filter((t: Tool) => !assignedToolIds.has(t.id));
+  const filteredAvailable = availableTools.filter((t: Tool) =>
     t.name.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -170,7 +175,7 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
-          {agentTools.length} ferramenta{agentTools.length !== 1 ? "s" : ""} associada{agentTools.length !== 1 ? "s" : ""}
+          {visibleAgentTools.length} ferramenta{visibleAgentTools.length !== 1 ? "s" : ""} associada{visibleAgentTools.length !== 1 ? "s" : ""}
         </h3>
         <Popover open={addOpen} onOpenChange={setAddOpen}>
           <PopoverTrigger asChild>
@@ -217,7 +222,7 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
         </Popover>
       </div>
 
-      {agentTools.length === 0 ? (
+      {visibleAgentTools.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
           <Wrench className="mb-2 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
@@ -226,7 +231,7 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
         </div>
       ) : (
         <div className="space-y-2">
-          {agentTools.map((agentTool) => {
+          {visibleAgentTools.map((agentTool) => {
             const tool = getToolInfo(agentTool.id_tool);
             return (
               <div
