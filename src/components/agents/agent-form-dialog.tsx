@@ -15,12 +15,14 @@ import {
 } from "@greatapps/greatauth-ui/ui";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ImageCropUpload } from "@greatapps/greatauth-ui";
 
 interface AgentFormDialogProps {
   config: GagentsHookConfig;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   agent?: Agent;
+  idAccount?: string | number | null;
 }
 
 interface FormState {
@@ -68,6 +70,7 @@ export function AgentFormDialog({
   open,
   onOpenChange,
   agent,
+  idAccount,
 }: AgentFormDialogProps) {
   const isEditing = !!agent;
   const createAgent = useCreateAgent(config);
@@ -139,19 +142,17 @@ export function AgentFormDialog({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="agent-photo">Foto (URL)</Label>
-            <Input
-              id="agent-photo"
-              name="photo"
-              value={form.photo}
-              onChange={(e) => updateField("photo", e.target.value)}
-              placeholder="https://exemplo.com/foto.jpg"
+          <div className="flex justify-center">
+            <ImageCropUpload
+              value={form.photo || null}
+              onChange={(url) => updateField("photo", url)}
+              onRemove={() => updateField("photo", "")}
+              entityType="agents"
+              entityId={agent?.id}
+              idAccount={typeof idAccount === "string" ? Number(idAccount) : (idAccount ?? Number(config.accountId) ?? 0)}
+              name={form.title || null}
               disabled={isPending}
             />
-            <p className="text-xs text-muted-foreground">
-              URL da imagem de avatar do agente
-            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="agent-title">Nome do Agente *</Label>
