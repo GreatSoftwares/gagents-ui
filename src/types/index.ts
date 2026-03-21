@@ -154,3 +154,13 @@ export interface AvailabilityResult {
   conflicts: AvailabilityConflict[];
   failed_providers: Array<{ provider: string; error: string }>;
 }
+
+// Capabilities
+export type {
+  CapabilityOperation,
+  CapabilityModule,
+  CapabilityCategory,
+  CapabilitiesResponse,
+  AgentCapability,
+  AgentCapabilitiesPayload,
+} from "./capabilities";

@@ -28,3 +28,13 @@ export {
 
 // Contacts
 export { useGagentsContacts } from "./use-contacts";
+
+// Capabilities
+export { useCapabilities, useAgentCapabilities, useUpdateAgentCapabilities } from "./use-capabilities";
+
+// Integrations
+export {
+  useIntegrationState,
+  type IntegrationCardState,
+  type IntegrationCardData,
+} from "./use-integrations";

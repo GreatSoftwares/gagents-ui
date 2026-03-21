@@ -12,6 +12,7 @@ import type {
   Tool,
   ToolCredential,
 } from "../types";
+import type { AgentCapability, AgentCapabilitiesPayload, CapabilitiesResponse } from "../types/capabilities";
 
 export interface GagentsClientConfig {
   baseUrl: string;
@@ -248,6 +249,19 @@ export function createGagentsClient(config: GagentsClientConfig) {
         undefined,
         { provider },
       ),
+
+    // --- Capabilities ---
+    getCapabilities: (idAccount: number) =>
+      request<CapabilitiesResponse>("GET", idAccount, "capabilities"),
+
+    getAgentCapabilities: (idAccount: number, idAgent: number) =>
+      request<AgentCapability[]>("GET", idAccount, `agents/${idAgent}/capabilities`),
+
+    updateAgentCapabilities: (
+      idAccount: number,
+      idAgent: number,
+      body: AgentCapabilitiesPayload,
+    ) => request<AgentCapability[]>("PUT", idAccount, `agents/${idAgent}/capabilities`, body),
   };
 }
 
