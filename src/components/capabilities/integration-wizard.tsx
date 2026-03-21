@@ -218,49 +218,64 @@ export function IntegrationWizard({
   // OAuth start
   // -----------------------------------------------------------------------
 
-  function startOAuth() {
-    const { language = "pt-br", idWl = 1, accountId } = config;
-
-    // Build OAuth authorize URL -- the backend already handles the full flow
-    const redirectUri = `${window.location.origin}/oauth/callback`;
-    const url = new URL(
-      `${gagentsApiUrl}/v1/${language}/${idWl}/accounts/${accountId}/oauth/authorize/${integration.slug}`,
-    );
-    url.searchParams.set("redirect_uri", redirectUri);
+  async function startOAuth() {
+    const { language = "pt-br", idWl = 1, accountId, token } = config;
 
     setOauthStatus("waiting");
 
-    // Open popup
-    const popup = window.open(
-      url.toString(),
-      "oauth-popup",
-      "width=500,height=600,scrollbars=yes,resizable=yes",
-    );
-    popupRef.current = popup;
+    try {
+      // 1. Get auth URL from backend
+      const response = await fetch(
+        `${gagentsApiUrl}/v1/${language}/${idWl}/accounts/${accountId}/oauth/authorize/${integration.slug}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const result = await response.json();
 
-    // Poll for popup closed without completing
-    if (popup) {
-      // Clear any previous poll interval
-      if (popupPollRef.current) {
-        clearInterval(popupPollRef.current);
+      if (result.status !== 1 || !result.data?.auth_url) {
+        setOauthStatus("error");
+        setOauthResult({
+          success: false,
+          error: result.message || "Erro ao obter URL de autorização",
+        });
+        return;
       }
-      popupPollRef.current = setInterval(() => {
-        if (popup.closed) {
-          if (popupPollRef.current) {
-            clearInterval(popupPollRef.current);
-            popupPollRef.current = null;
-          }
-          // Only set error if we're still waiting (no success message received)
-          setOauthStatus((prev) =>
-            prev === "waiting" ? "error" : prev,
-          );
-          setOauthResult((prev) =>
-            prev === null
-              ? { success: false, error: "Janela fechada antes de concluir" }
-              : prev,
-          );
+
+      // 2. Open auth URL in popup
+      const popup = window.open(
+        result.data.auth_url,
+        "oauth-popup",
+        "width=500,height=600,scrollbars=yes,resizable=yes",
+      );
+      popupRef.current = popup;
+
+      // Poll for popup closed without completing
+      if (popup) {
+        if (popupPollRef.current) {
+          clearInterval(popupPollRef.current);
         }
-      }, 500);
+        popupPollRef.current = setInterval(() => {
+          if (popup.closed) {
+            if (popupPollRef.current) {
+              clearInterval(popupPollRef.current);
+              popupPollRef.current = null;
+            }
+            setOauthStatus((prev) =>
+              prev === "waiting" ? "error" : prev,
+            );
+            setOauthResult((prev) =>
+              prev === null
+                ? { success: false, error: "Janela fechada antes de concluir" }
+                : prev,
+            );
+          }
+        }, 500);
+      }
+    } catch (err) {
+      setOauthStatus("error");
+      setOauthResult({
+        success: false,
+        error: "Erro de rede ao obter URL de autorização",
+      });
     }
   }
 

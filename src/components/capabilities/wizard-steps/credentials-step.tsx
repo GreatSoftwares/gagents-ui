@@ -1,7 +1,7 @@
 'use client';
 
-import { CheckCircle2, Loader2, AlertCircle, Shield, Info } from "lucide-react";
-import { Button, Input, Label, Tooltip, TooltipTrigger, TooltipContent } from "@greatapps/greatauth-ui/ui";
+import { CheckCircle2, Loader2, AlertCircle, Shield } from "lucide-react";
+import { Button, Input, Label } from "@greatapps/greatauth-ui/ui";
 import type { IntegrationDefinition } from "../../../data/integrations-registry";
 import type { WizardIntegrationMeta, OAuthStatus, OAuthResult } from "../types";
 
@@ -14,8 +14,6 @@ interface CredentialsStepProps {
   onApiKeyChange: (value: string) => void;
   onStartOAuth: () => void;
   isReconnect?: boolean;
-  /** When true, the OAuth authorize endpoint is available on the backend. */
-  oauthConfigured?: boolean;
 }
 
 export function CredentialsStep({
@@ -27,7 +25,6 @@ export function CredentialsStep({
   onApiKeyChange,
   onStartOAuth,
   isReconnect = false,
-  oauthConfigured = false,
 }: CredentialsStepProps) {
   if (integration.authType === "oauth2") {
     return (
@@ -38,7 +35,6 @@ export function CredentialsStep({
         oauthResult={oauthResult}
         onStartOAuth={onStartOAuth}
         isReconnect={isReconnect}
-        oauthConfigured={oauthConfigured}
       />
     );
   }
@@ -57,7 +53,6 @@ function OAuthCredentials({
   oauthResult,
   onStartOAuth,
   isReconnect,
-  oauthConfigured,
 }: {
   integration: IntegrationDefinition;
   meta: WizardIntegrationMeta;
@@ -65,7 +60,6 @@ function OAuthCredentials({
   oauthResult: OAuthResult | null;
   onStartOAuth: () => void;
   isReconnect: boolean;
-  oauthConfigured: boolean;
 }) {
   const providerLabel = meta.providerLabel || integration.name;
 
@@ -80,51 +74,19 @@ function OAuthCredentials({
         </p>
       </div>
 
-      {/* OAuth not configured notice */}
-      {!oauthConfigured && oauthStatus === "idle" && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
-          <Info
-            aria-hidden="true"
-            className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
-          />
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-              Configuração necessária
-            </p>
-            <p className="text-xs text-amber-700 dark:text-amber-300">
-              A integração com {providerLabel} requer configuração pelo
-              administrador do sistema. Entre em contato com o suporte para
-              ativar esta funcionalidade.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* OAuth status area */}
       <div className="flex flex-col items-center gap-4 rounded-lg border p-6">
         {oauthStatus === "idle" && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span tabIndex={!oauthConfigured ? 0 : undefined}>
-                <Button
-                  onClick={onStartOAuth}
-                  size="lg"
-                  className="gap-2"
-                  disabled={!oauthConfigured}
-                >
-                  {meta.icon}
-                  {isReconnect
-                    ? `Reconectar com ${providerLabel}`
-                    : `Conectar com ${providerLabel}`}
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!oauthConfigured && (
-              <TooltipContent>
-                Integração OAuth ainda não configurada no servidor
-              </TooltipContent>
-            )}
-          </Tooltip>
+          <Button
+            onClick={onStartOAuth}
+            size="lg"
+            className="gap-2"
+          >
+            {meta.icon}
+            {isReconnect
+              ? `Reconectar com ${providerLabel}`
+              : `Conectar com ${providerLabel}`}
+          </Button>
         )}
 
         {oauthStatus === "waiting" && (
