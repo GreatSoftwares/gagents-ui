@@ -12,7 +12,7 @@ export interface IntegrationDefinition {
 
 export const INTEGRATIONS_REGISTRY: IntegrationDefinition[] = [
   {
-    slug: "google_calendar",
+    slug: "google-calendar",
     name: "Google Agenda",
     description: "Sincronize agendamentos com o Google Calendar",
     icon: "CalendarSync",
