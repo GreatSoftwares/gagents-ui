@@ -23,19 +23,19 @@ export function AgentTabs({ agent, config, renderChatLink }: AgentTabsProps) {
     <Tabs defaultValue="prompt">
       <TabsList>
         <TabsTrigger value="prompt" className="flex items-center gap-1.5">
-          <FileText className="h-3.5 w-3.5" />
+          <FileText aria-hidden="true" className="h-3.5 w-3.5" />
           Prompt
         </TabsTrigger>
         <TabsTrigger value="objetivos" className="flex items-center gap-1.5">
-          <Target className="h-3.5 w-3.5" />
+          <Target aria-hidden="true" className="h-3.5 w-3.5" />
           Objetivos
         </TabsTrigger>
         <TabsTrigger value="ferramentas" className="flex items-center gap-1.5">
-          <Wrench className="h-3.5 w-3.5" />
+          <Wrench aria-hidden="true" className="h-3.5 w-3.5" />
           Ferramentas
         </TabsTrigger>
         <TabsTrigger value="conversas" className="flex items-center gap-1.5">
-          <MessageCircle className="h-3.5 w-3.5" />
+          <MessageCircle aria-hidden="true" className="h-3.5 w-3.5" />
           Conversas
         </TabsTrigger>
       </TabsList>

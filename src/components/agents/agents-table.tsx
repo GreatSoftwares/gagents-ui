@@ -78,6 +78,7 @@ function useColumns(
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
+                aria-label="Editar"
                 onClick={() => onEdit(row.original)}
               >
                 <Pencil className="h-4 w-4" />
@@ -91,6 +92,7 @@ function useColumns(
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:text-destructive"
+                aria-label="Excluir"
                 onClick={() => onDelete(row.original.id)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -151,9 +153,12 @@ export function AgentsTable({ config, onNavigateToAgent }: { config: GagentsHook
     <>
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar agentes..."
+            placeholder="Buscar agentes\u2026"
+            aria-label="Buscar agentes"
+            name="search"
+            autoComplete="off"
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"

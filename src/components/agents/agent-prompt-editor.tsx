@@ -214,24 +214,28 @@ export function AgentPromptEditor({ config, agent }: AgentPromptEditorProps) {
         <div className="space-y-2">
           <textarea
             ref={textareaRef}
+            aria-label="Prompt do sistema"
+            name="prompt"
             value={promptText}
             onChange={(e) => setPromptText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Escreva o prompt do sistema aqui..."
+            placeholder="Escreva o prompt do sistema aqui\u2026"
             disabled={updateAgent.isPending}
             className="w-full resize-none rounded-lg border bg-background p-3 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
             style={{ minHeight: "300px" }}
           />
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span>{charCount.toLocaleString("pt-BR")} caracteres</span>
+            <span className="tabular-nums">{charCount.toLocaleString("pt-BR")} caracteres</span>
             <span>·</span>
-            <span>~{tokenEstimate.toLocaleString("pt-BR")} tokens</span>
+            <span className="tabular-nums">~{tokenEstimate.toLocaleString("pt-BR")} tokens</span>
           </div>
         </div>
 
         {/* Save row */}
         <div className="flex items-center gap-3">
           <Input
+            aria-label="Notas da alteração"
+            name="changeNotes"
             value={changeNotes}
             onChange={(e) => setChangeNotes(e.target.value)}
             placeholder="O que mudou? (opcional)"
@@ -390,7 +394,7 @@ export function AgentPromptEditor({ config, agent }: AgentPromptEditorProps) {
                         onClick={() => setCompareVersionId(isComparing ? null : version.id)}
                         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                       >
-                        <FileText className="h-3 w-3" />
+                        <FileText aria-hidden="true" className="h-3 w-3" />
                         {isComparing ? "Ocultar diff" : "Comparar"}
                       </button>
                       <button
@@ -398,7 +402,7 @@ export function AgentPromptEditor({ config, agent }: AgentPromptEditorProps) {
                         onClick={() => handleRestore(version)}
                         className="flex items-center gap-1 text-xs text-primary hover:underline"
                       >
-                        <RotateCcw className="h-3 w-3" />
+                        <RotateCcw aria-hidden="true" className="h-3 w-3" />
                         Restaurar
                       </button>
                     </div>

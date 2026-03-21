@@ -70,7 +70,7 @@ function useColumns(
         if (!desc) return <span className="text-muted-foreground text-sm">{"\u2014"}</span>;
         return (
           <span className="text-muted-foreground text-sm">
-            {desc.length > 50 ? `${desc.slice(0, 50)}...` : desc}
+            {desc.length > 50 ? `${desc.slice(0, 50)}\u2026` : desc}
           </span>
         );
       },
@@ -98,6 +98,7 @@ function useColumns(
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
+                aria-label="Editar"
                 onClick={() => onEdit(row.original)}
               >
                 <Pencil className="h-4 w-4" />
@@ -111,6 +112,7 @@ function useColumns(
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:text-destructive"
+                aria-label="Excluir"
                 onClick={() => onDelete(row.original.id)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -171,9 +173,12 @@ export function ToolsTable({ onEdit, config }: ToolsTableProps) {
     <>
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar ferramentas..."
+            placeholder="Buscar ferramentas\u2026"
+            aria-label="Buscar ferramentas"
+            name="search"
+            autoComplete="off"
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"

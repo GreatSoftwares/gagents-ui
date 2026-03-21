@@ -238,7 +238,7 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
                 className="flex items-center gap-3 rounded-lg border bg-card p-3"
               >
                 <SortableItemHandle className="shrink-0 text-muted-foreground hover:text-foreground">
-                  <GripVertical className="h-5 w-5" />
+                  <GripVertical aria-hidden="true" className="h-5 w-5" />
                 </SortableItemHandle>
 
                 <div className="flex flex-1 flex-col gap-1 min-w-0">
@@ -260,6 +260,7 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
                 </div>
 
                 <Switch
+                  aria-label="Ativar/Desativar"
                   checked={objective.active}
                   onCheckedChange={(checked) =>
                     handleToggleActive(objective, checked)
@@ -270,6 +271,7 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Editar"
                   className="shrink-0 text-muted-foreground hover:text-foreground"
                   onClick={() => openEdit(objective)}
                 >
@@ -279,6 +281,7 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Excluir"
                   className="shrink-0 text-muted-foreground hover:text-destructive"
                   onClick={() => setRemoveTarget(objective)}
                 >
@@ -292,7 +295,7 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
               const obj = sortedObjectives.find((o) => o.id === value);
               return (
                 <div className="flex items-center gap-3 rounded-lg border bg-card p-3 shadow-lg">
-                  <GripVertical className="h-5 w-5 text-muted-foreground" />
+                  <GripVertical aria-hidden="true" className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium">{obj?.title}</span>
                 </div>
               );
@@ -311,8 +314,10 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Título *</Label>
+              <Label htmlFor="objective-title">Título *</Label>
               <Input
+                id="objective-title"
+                name="title"
                 value={form.title}
                 onChange={(e) => {
                   const title = e.target.value;
@@ -327,8 +332,10 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
             </div>
 
             <div className="space-y-2">
-              <Label>Slug (identificador) *</Label>
+              <Label htmlFor="objective-slug">Slug (identificador) *</Label>
               <Input
+                id="objective-slug"
+                name="slug"
                 value={form.slug}
                 onChange={(e) => {
                   setSlugManual(true);
@@ -343,13 +350,15 @@ export function AgentObjectivesList({ agent, config }: AgentObjectivesListProps)
             </div>
 
             <div className="space-y-2">
-              <Label>Instruções do Objetivo</Label>
+              <Label htmlFor="objective-prompt">Instruções do Objetivo</Label>
               <Textarea
+                id="objective-prompt"
+                name="prompt"
                 value={form.prompt}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, prompt: e.target.value }))
                 }
-                placeholder="Instruções detalhadas que o agente seguirá quando este objetivo for ativado. Ex: passos para agendar consulta, perguntas a fazer, validações necessárias..."
+                placeholder="Instru\u00e7\u00f5es detalhadas que o agente seguir\u00e1 quando este objetivo for ativado\u2026"
                 rows={8}
               />
               <p className="text-xs text-muted-foreground">

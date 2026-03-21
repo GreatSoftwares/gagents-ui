@@ -45,7 +45,7 @@ export function ConversationView({
           <p className="text-sm text-muted-foreground">
             Conversa não encontrada.
           </p>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" aria-label="Fechar" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -58,7 +58,7 @@ export function ConversationView({
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">Detalhes da conversa #{conversation.id}</h3>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" aria-label="Fechar" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>

@@ -189,6 +189,7 @@ export function ToolFormDialog({
             <Label htmlFor="tool-name">Nome *</Label>
             <Input
               id="tool-name"
+              name="name"
               value={form.name}
               onChange={(e) => {
                 const name = e.target.value;
@@ -213,6 +214,7 @@ export function ToolFormDialog({
             <Label htmlFor="tool-slug">Slug (identificador único) *</Label>
             <Input
               id="tool-slug"
+              name="slug"
               value={form.slug}
               onChange={(e) => {
                 setSlugManuallyEdited(true);
@@ -269,11 +271,12 @@ export function ToolFormDialog({
             <Label htmlFor="tool-description">Descrição</Label>
             <Textarea
               id="tool-description"
+              name="description"
               value={form.description}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, description: e.target.value }))
               }
-              placeholder="Descrição da ferramenta..."
+              placeholder="Descri\u00e7\u00e3o da ferramenta\u2026"
               rows={3}
               disabled={isPending}
             />
@@ -285,6 +288,7 @@ export function ToolFormDialog({
             </Label>
             <Textarea
               id="tool-function-defs"
+              name="functionDefs"
               value={form.functionDefinitions}
               onChange={(e) => {
                 setForm((prev) => ({
@@ -298,11 +302,11 @@ export function ToolFormDialog({
     "type": "function",
     "function": {
       "name": "nome_da_funcao",
-      "description": "O que a função faz",
+      "description": "O que a fun\u00e7\u00e3o faz",
       "parameters": {
         "type": "object",
-        "properties": { ... },
-        "required": [...]
+        "properties": { \u2026 },
+        "required": [\u2026]
       }
     }
   }
@@ -330,7 +334,7 @@ export function ToolFormDialog({
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
               {isEditing ? "Salvar" : "Criar"}
             </Button>

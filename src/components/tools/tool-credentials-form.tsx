@@ -130,6 +130,7 @@ function useColumns(
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
+                  aria-label="Vincular"
                   disabled
                 >
                   <Link className="h-4 w-4" />
@@ -144,6 +145,7 @@ function useColumns(
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
+                aria-label="Editar"
                 onClick={() => onEdit(row.original)}
               >
                 <Pencil className="h-4 w-4" />
@@ -157,6 +159,7 @@ function useColumns(
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:text-destructive"
+                aria-label="Excluir"
                 onClick={() => onRemove(row.original)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -328,9 +331,12 @@ export function ToolCredentialsForm({
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar credenciais..."
+            placeholder="Buscar credenciais\u2026"
+            aria-label="Buscar credenciais"
+            name="search"
+            autoComplete="off"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -353,7 +359,7 @@ export function ToolCredentialsForm({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="cred-tool" className="mb-1 block text-sm font-medium">
                 Ferramenta *
               </label>
               <Select
@@ -362,7 +368,7 @@ export function ToolCredentialsForm({
                   setCreateForm((f) => ({ ...f, id_tool: val }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger id="cred-tool">
                   <SelectValue placeholder="Selecione a ferramenta" />
                 </SelectTrigger>
                 <SelectContent>
@@ -375,10 +381,12 @@ export function ToolCredentialsForm({
               </Select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="cred-label" className="mb-1 block text-sm font-medium">
                 Label *
               </label>
               <Input
+                id="cred-label"
+                name="label"
                 value={createForm.label}
                 onChange={(e) =>
                   setCreateForm((f) => ({ ...f, label: e.target.value }))
@@ -387,10 +395,13 @@ export function ToolCredentialsForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="cred-credential" className="mb-1 block text-sm font-medium">
                 Credencial *
               </label>
               <Input
+                id="cred-credential"
+                name="credential"
+                autoComplete="off"
                 type="password"
                 value={createForm.credentials_encrypted}
                 onChange={(e) =>
@@ -403,10 +414,12 @@ export function ToolCredentialsForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="cred-expires" className="mb-1 block text-sm font-medium">
                 Data de Expiração (opcional)
               </label>
               <Input
+                id="cred-expires"
+                name="expires"
                 type="date"
                 value={createForm.expires_at}
                 onChange={(e) =>
@@ -448,7 +461,7 @@ export function ToolCredentialsForm({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="edit-cred-tool" className="mb-1 block text-sm font-medium">
                 Ferramenta *
               </label>
               <Select
@@ -457,7 +470,7 @@ export function ToolCredentialsForm({
                   setEditForm((f) => ({ ...f, id_tool: val }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger id="edit-cred-tool">
                   <SelectValue placeholder="Selecione a ferramenta" />
                 </SelectTrigger>
                 <SelectContent>
@@ -470,10 +483,12 @@ export function ToolCredentialsForm({
               </Select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="edit-cred-label" className="mb-1 block text-sm font-medium">
                 Label
               </label>
               <Input
+                id="edit-cred-label"
+                name="label"
                 value={editForm.label}
                 onChange={(e) =>
                   setEditForm((f) => ({ ...f, label: e.target.value }))
@@ -482,10 +497,13 @@ export function ToolCredentialsForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="edit-cred-credential" className="mb-1 block text-sm font-medium">
                 Nova Credencial (vazio = manter atual)
               </label>
               <Input
+                id="edit-cred-credential"
+                name="credential"
+                autoComplete="off"
                 type="password"
                 value={editForm.credentials_encrypted}
                 onChange={(e) =>
@@ -498,10 +516,12 @@ export function ToolCredentialsForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">
+              <label htmlFor="edit-cred-expires" className="mb-1 block text-sm font-medium">
                 Data de Expiração
               </label>
               <Input
+                id="edit-cred-expires"
+                name="expires"
                 type="date"
                 value={editForm.expires_at}
                 onChange={(e) =>
@@ -510,7 +530,7 @@ export function ToolCredentialsForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Status</label>
+              <label htmlFor="edit-cred-status" className="mb-1 block text-sm font-medium">Status</label>
               <Select
                 value={editForm.status || undefined}
                 onValueChange={(val) =>
@@ -520,7 +540,7 @@ export function ToolCredentialsForm({
                   }))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger id="edit-cred-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

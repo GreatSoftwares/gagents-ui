@@ -119,6 +119,7 @@ export function AgentEditForm({ config, agent, idAccount, open, onOpenChange }: 
         <Label htmlFor="edit-title">Nome do Agente *</Label>
         <Input
           id="edit-title"
+          name="title"
           value={form.title}
           onChange={(e) => {
             setForm((prev) => ({
@@ -152,6 +153,7 @@ export function AgentEditForm({ config, agent, idAccount, open, onOpenChange }: 
           <Label htmlFor="edit-delay">Delay de Digitação (s)</Label>
           <Input
             id="edit-delay"
+            name="delay"
             type="number"
             value={form.delayTyping}
             onChange={(e) => updateField("delayTyping", e.target.value)}
@@ -168,6 +170,7 @@ export function AgentEditForm({ config, agent, idAccount, open, onOpenChange }: 
           <Label htmlFor="edit-waiting">Tempo de Espera (s)</Label>
           <Input
             id="edit-waiting"
+            name="waiting"
             type="number"
             value={form.waitingTime}
             onChange={(e) => updateField("waitingTime", e.target.value)}
@@ -193,7 +196,7 @@ export function AgentEditForm({ config, agent, idAccount, open, onOpenChange }: 
         </Button>
         <Button type="submit" disabled={updateAgent.isPending}>
           {updateAgent.isPending && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
           )}
           Salvar
         </Button>

@@ -182,7 +182,9 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
           <PopoverContent className="w-72 p-0" align="end">
             <div className="p-2">
               <Input
-                placeholder="Buscar ferramenta..."
+                placeholder="Buscar ferramenta\u2026"
+                aria-label="Buscar ferramenta"
+                name="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-8"
@@ -250,6 +252,7 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
                 </div>
 
                 <Switch
+                  aria-label="Ativar/Desativar"
                   checked={agentTool.enabled}
                   onCheckedChange={(checked) =>
                     handleToggleEnabled(agentTool, checked)
@@ -260,6 +263,7 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Configurar"
                   className="shrink-0 text-muted-foreground hover:text-foreground"
                   onClick={() => openConfig(agentTool)}
                   title="Configurar instruções"
@@ -270,6 +274,7 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Remover"
                   className="shrink-0 text-muted-foreground hover:text-destructive"
                   onClick={() => setRemoveTarget(agentTool)}
                 >
@@ -295,12 +300,12 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
           <div className="space-y-4">
             {configTarget && getToolInfo(configTarget.id_tool)?.type !== "none" && (
               <div className="space-y-2">
-                <Label>Credencial</Label>
+                <Label htmlFor="tool-credential">Credencial</Label>
                 <Select
                   value={configCredentialId || undefined}
                   onValueChange={(val) => setConfigCredentialId(val === "__none__" ? "" : val)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="tool-credential">
                     <SelectValue placeholder="Selecione uma credencial (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -320,11 +325,13 @@ export function AgentToolsList({ agent, config }: AgentToolsListProps) {
               </div>
             )}
             <div className="space-y-2">
-              <Label>Instruções Personalizadas</Label>
+              <Label htmlFor="tool-instructions">Instruções Personalizadas</Label>
               <Textarea
+                id="tool-instructions"
+                name="instructions"
                 value={configInstructions}
                 onChange={(e) => setConfigInstructions(e.target.value)}
-                placeholder="Instruções sobre como e quando o agente deve usar esta ferramenta..."
+                placeholder="Instru\u00e7\u00f5es sobre como e quando o agente deve usar esta ferramenta\u2026"
                 rows={6}
               />
               <p className="text-xs text-muted-foreground">

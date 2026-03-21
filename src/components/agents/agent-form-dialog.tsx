@@ -96,6 +96,7 @@ export function AgentFormDialog({
             <Label htmlFor="agent-photo">Foto (URL)</Label>
             <Input
               id="agent-photo"
+              name="photo"
               value={photo}
               onChange={(e) => setPhoto(e.target.value)}
               placeholder="https://exemplo.com/foto.jpg"
@@ -106,6 +107,7 @@ export function AgentFormDialog({
             <Label htmlFor="agent-title">Nome do Agente *</Label>
             <Input
               id="agent-title"
+              name="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Assistente de Agendamento"
@@ -118,6 +120,7 @@ export function AgentFormDialog({
               <Label htmlFor="agent-delay">Delay de Digitação (ms)</Label>
               <Input
                 id="agent-delay"
+                name="delay"
                 type="number"
                 value={delayTyping}
                 onChange={(e) => setDelayTyping(e.target.value)}
@@ -130,6 +133,7 @@ export function AgentFormDialog({
               <Label htmlFor="agent-waiting">Tempo de Espera (ms)</Label>
               <Input
                 id="agent-waiting"
+                name="waiting"
                 type="number"
                 value={waitingTime}
                 onChange={(e) => setWaitingTime(e.target.value)}
@@ -150,7 +154,7 @@ export function AgentFormDialog({
             </Button>
             <Button type="submit" disabled={isPending || !title.trim()}>
               {isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
               {isEditing ? "Salvar" : "Criar"}
             </Button>

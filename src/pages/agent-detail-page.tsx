@@ -49,7 +49,7 @@ export function AgentDetailPage({
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <div className="rounded-lg border p-4 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
           <div className="flex items-start gap-3 flex-1">
@@ -57,6 +57,7 @@ export function AgentDetailPage({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Voltar"
                 className="shrink-0 mt-1"
                 onClick={onBack}
               >

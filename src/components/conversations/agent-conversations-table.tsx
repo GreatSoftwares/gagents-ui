@@ -89,11 +89,21 @@ export function AgentConversationsTable({
             <TableRow
               key={conversation.id}
               className="cursor-pointer"
+              role="button"
+              tabIndex={0}
               onClick={() =>
                 setSelectedId(
                   selectedId === conversation.id ? null : conversation.id,
                 )
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedId(
+                    selectedId === conversation.id ? null : conversation.id,
+                  );
+                }
+              }}
               data-state={selectedId === conversation.id ? "selected" : undefined}
             >
               <TableCell className="font-mono text-xs">
@@ -111,10 +121,10 @@ export function AgentConversationsTable({
                   <span className="text-xs text-muted-foreground">—</span>
                 )}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right tabular-nums">
                 {conversation.message_count ?? "—"}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right tabular-nums">
                 {conversation.usage_tokens ?? "—"}
               </TableCell>
               <TableCell>
@@ -133,6 +143,7 @@ export function AgentConversationsTable({
                     <a
                       href={`/gchat/inbox/${conversation.id_external}`}
                       title="Ver no Chat"
+                      aria-label="Ver no Chat"
                       onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     >
