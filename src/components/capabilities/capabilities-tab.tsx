@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import type { GagentsHookConfig } from "../../hooks/types";
 import {
   useCapabilities,
@@ -31,6 +31,7 @@ import {
   HeartHandshake,
   Package,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -129,7 +130,6 @@ export function CapabilitiesTab({ config, agentId }: CapabilitiesTabProps) {
   const [localState, setLocalState] = useState<CapabilityState>(new Map());
   const [serverState, setServerState] = useState<CapabilityState>(new Map());
   const [initialized, setInitialized] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sync server data into local state on first load / refetch
   useEffect(() => {
@@ -151,41 +151,12 @@ export function CapabilitiesTab({ config, agentId }: CapabilitiesTabProps) {
     [localState, serverState, initialized],
   );
 
-  // ------ Debounced save ------
-  const scheduleSave = useCallback(
-    (nextState: CapabilityState) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        const payload = stateToPayload(nextState);
-        updateMutation.mutate(
-          { agentId, payload },
-          {
-            onSuccess: () => {
-              setServerState(cloneState(nextState));
-              toast.success("Capacidades salvas");
-            },
-            onError: () => {
-              // Rollback to server state
-              setLocalState(cloneState(serverState));
-              toast.error("Erro ao salvar capacidades");
-            },
-          },
-        );
-      }, 500);
-    },
-    [agentId, updateMutation, serverState],
-  );
-
   // ------ State mutation helpers ------
   const updateState = useCallback(
     (updater: (prev: CapabilityState) => CapabilityState) => {
-      setLocalState((prev) => {
-        const next = updater(prev);
-        scheduleSave(next);
-        return next;
-      });
+      setLocalState((prev) => updater(prev));
     },
-    [scheduleSave],
+    [],
   );
 
   const toggleModule = useCallback(
@@ -242,12 +213,10 @@ export function CapabilitiesTab({ config, agentId }: CapabilitiesTabProps) {
   }, [updateState]);
 
   const discard = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
     setLocalState(cloneState(serverState));
   }, [serverState]);
 
   const saveNow = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
     const payload = stateToPayload(localState);
     updateMutation.mutate(
       { agentId, payload },
@@ -368,20 +337,15 @@ export function CapabilitiesTab({ config, agentId }: CapabilitiesTabProps) {
 
       {/* Save bar */}
       {hasChanges && (
-        <div className="sticky bottom-0 bg-background border-t py-3 px-4 -mx-4 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            Você tem alterações não salvas.
-          </span>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={discard}>
+        <div className="sticky bottom-0 z-10 flex items-center justify-between gap-2 rounded-lg border bg-background p-3 shadow-sm">
+          <p className="text-sm text-muted-foreground">Você tem alterações não salvas.</p>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={discard} disabled={updateMutation.isPending}>
               Descartar
             </Button>
-            <Button
-              size="sm"
-              onClick={saveNow}
-              disabled={updateMutation.isPending}
-            >
-              {updateMutation.isPending ? "Salvando..." : "Salvar"}
+            <Button size="sm" onClick={saveNow} disabled={updateMutation.isPending}>
+              {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar
             </Button>
           </div>
         </div>
