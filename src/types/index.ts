@@ -105,7 +105,7 @@ export interface ToolCredential {
   label: string;
   credentials_encrypted: string;
   expires_at: string | null;
-  status: "active" | "expired";
+  status: "active" | "expired" | "inactive";
   authorized_by_contact: number | null;
   deleted: number;
   datetime_add: string;

@@ -23,7 +23,7 @@ export function useAddAgentTool(config: GagentsHookConfig) {
       body,
     }: {
       idAgent: number;
-      body: { id_tool: number; enabled?: boolean };
+      body: { id_tool: number; enabled?: boolean; custom_instructions?: string };
     }) => client.addAgentTool(config.accountId, idAgent, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["greatagents", "agent-tools"] });

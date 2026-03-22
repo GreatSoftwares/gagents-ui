@@ -63,29 +63,59 @@ function buildPreview(
   let preview = promptText;
 
   const activeObjectives = objectives.filter((o) => o.active);
-  if (activeObjectives.length > 0) {
-    preview += "\n\n[SKILLS DISPONÍVEIS]\n";
-    for (const obj of activeObjectives) {
-      preview += `- ${obj.title}`;
-      if (obj.prompt) preview += `: ${obj.prompt}`;
-      preview += "\n";
+  const enabledAgentTools = agentTools.filter((at) => at.enabled);
+
+  const toolMap = new Map(allTools.map((t) => [t.id, t]));
+
+  // Separate capabilities vs integrations
+  const capabilityTools: { at: AgentTool; tool: Tool }[] = [];
+  const integrationTools: { at: AgentTool; tool: Tool }[] = [];
+  for (const at of enabledAgentTools) {
+    const tool = toolMap.get(at.id_tool);
+    if (!tool) continue;
+    if (tool.type === "integration") {
+      integrationTools.push({ at, tool });
+    } else {
+      capabilityTools.push({ at, tool });
     }
   }
 
-  const enabledAgentTools = agentTools.filter((at) => at.enabled);
-  if (enabledAgentTools.length > 0) {
-    const toolMap = new Map(allTools.map((t) => [t.id, t]));
-    preview += "\n[TOOLS DISPONÍVEIS]\n";
-    for (const at of enabledAgentTools) {
-      const tool = toolMap.get(at.id_tool);
-      const name = tool?.name || `Tool #${at.id_tool}`;
-      const desc = tool?.description ? `: ${tool.description}` : "";
-      preview += `- ${name}${desc}`;
-      if (at.custom_instructions) {
-        preview += `\n  Instruções: ${at.custom_instructions}`;
+  const hasContent = activeObjectives.length > 0 || capabilityTools.length > 0 || integrationTools.length > 0;
+
+  if (hasContent) {
+    preview += "\n\n[CAPACIDADES E INTEGRAÇÕES]";
+
+    // Internal capabilities
+    if (activeObjectives.length > 0 || capabilityTools.length > 0) {
+      preview += "\n\n## Capacidades Internas (GClinic)";
+
+      for (const obj of activeObjectives) {
+        preview += `\n\n### ${obj.title} (${obj.slug})`;
+        if (obj.prompt) preview += `\n${obj.prompt}`;
       }
-      preview += "\n";
+
+      for (const { at, tool } of capabilityTools) {
+        preview += `\n\n### ${tool.name} (${tool.slug})`;
+        if (tool.description) preview += `\n${tool.description}`;
+        if (at.custom_instructions) preview += `\n${at.custom_instructions}`;
+      }
     }
+
+    // External integrations
+    if (integrationTools.length > 0) {
+      preview += "\n\n## Integrações Externas";
+
+      for (const { at, tool } of integrationTools) {
+        preview += `\n\n### ${tool.name} (${tool.slug})`;
+        if (at.custom_instructions) preview += `\n${at.custom_instructions}`;
+      }
+    }
+
+    // Rules
+    preview += "\n\n## Regras";
+    preview += "\n- Sempre confirme com o usuário antes de criar ou alterar registros.";
+    preview += "\n- Nunca invente dados — sempre consulte primeiro.";
+    preview += "\n- Use EXATAMENTE os nomes de função listados acima.";
   }
 
   return preview;
@@ -277,13 +307,20 @@ export function AgentPromptEditor({ config, agent }: AgentPromptEditorProps) {
             <div className="border-t px-4 py-3">
               <pre className="max-h-96 overflow-auto whitespace-pre-wrap font-mono text-sm leading-relaxed">
                 {previewText.split("\n").map((line, i) => {
-                  const isSection =
-                    line.startsWith("[SKILLS DISPONÍVEIS]") ||
-                    line.startsWith("[TOOLS DISPONÍVEIS]");
+                  const isTopSection = line.startsWith("[CAPACIDADES E INTEGRAÇÕES]");
+                  const isH2 = line.startsWith("## ");
+                  const isH3 = line.startsWith("### ");
+                  const cls = isTopSection
+                    ? "font-bold text-foreground"
+                    : isH2
+                      ? "font-semibold text-muted-foreground"
+                      : isH3
+                        ? "font-medium text-muted-foreground"
+                        : "";
                   return (
                     <span
                       key={i}
-                      className={isSection ? "font-semibold text-muted-foreground" : ""}
+                      className={cls}
                     >
                       {line}
                       {"\n"}

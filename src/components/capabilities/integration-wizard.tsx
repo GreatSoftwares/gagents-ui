@@ -347,10 +347,13 @@ export function IntegrationWizard({
       //
       // For OAuth, the credential was already created by the backend callback.
       // The parent component handles any additional linking (agent_tool creation)
-      // via the onComplete callback.
+      // and query invalidation via the onComplete callback.
+      //
+      // Call onComplete BEFORE closing the dialog so query invalidation
+      // triggers while the dialog is still mounted (avoids stale UI).
 
       onComplete();
-      onOpenChange(false);
+
       toast.success(
         `${integration.name} ${isReconnect ? "reconectado" : "configurado"} com sucesso!`,
       );
