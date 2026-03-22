@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Users,
   Clock,
+  Plus,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../../lib";
@@ -24,6 +25,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   RefreshCw,
   Users,
   Clock,
+  Plus,
 };
 
 function resolveIcon(name: string): LucideIcon {
@@ -58,8 +60,9 @@ const STATE_BADGES: Record<IntegrationCardState, BadgeVariant> = {
   },
 };
 
-function getActionLabel(state: IntegrationCardState): string {
-  switch (state) {
+function getActionLabel(card: IntegrationCardData): string {
+  if (card.isAddNew) return "Conectar";
+  switch (card.state) {
     case "available":
       return "Conectar";
     case "connected":
@@ -81,11 +84,71 @@ export interface IntegrationCardProps {
 }
 
 export function IntegrationCard({ card, onConnect }: IntegrationCardProps) {
-  const { definition, state, sharedByAgentsCount } = card;
+  const { definition, state, sharedByAgentsCount, isAddNew, accountLabel } = card;
   const Icon = resolveIcon(definition.icon);
-  const badge = STATE_BADGES[state];
-  const actionLabel = getActionLabel(state);
   const isComingSoon = state === "coming_soon";
+  const actionLabel = getActionLabel(card);
+
+  // "Add new" card uses a muted/outlined style
+  if (isAddNew) {
+    return (
+      <div
+        className={cn(
+          "group relative flex flex-col gap-3 rounded-xl border border-dashed bg-card/50 p-5 transition-shadow",
+          "hover:shadow-md hover:border-solid hover:bg-card cursor-pointer",
+        )}
+        role="button"
+        tabIndex={0}
+        aria-label={`Adicionar conta ${definition.name}`}
+        onClick={() => onConnect(card)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onConnect(card);
+          }
+        }}
+      >
+        {/* Header row */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary/60">
+            <Icon className="h-5 w-5" />
+          </div>
+          <Badge variant="outline" className="text-xs bg-muted text-muted-foreground">
+            Adicionar
+          </Badge>
+        </div>
+
+        {/* Name + description */}
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold leading-tight text-muted-foreground">
+            {definition.name}
+          </h3>
+          <p className="text-xs text-muted-foreground/70 leading-relaxed flex items-center gap-1">
+            <Plus className="h-3 w-3" />
+            Adicionar conta
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-auto flex items-center justify-end pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              onConnect(card);
+            }}
+          >
+            {actionLabel}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Connected / expired / available card
+  const badge = STATE_BADGES[state];
 
   return (
     <div
@@ -97,7 +160,7 @@ export function IntegrationCard({ card, onConnect }: IntegrationCardProps) {
       )}
       role="button"
       tabIndex={isComingSoon ? -1 : 0}
-      aria-label={`${definition.name} — ${badge.label}`}
+      aria-label={`${definition.name}${accountLabel ? ` — ${accountLabel}` : ""} — ${badge.label}`}
       aria-disabled={isComingSoon}
       onClick={() => !isComingSoon && onConnect(card)}
       onKeyDown={(e) => {
@@ -117,12 +180,18 @@ export function IntegrationCard({ card, onConnect }: IntegrationCardProps) {
         </Badge>
       </div>
 
-      {/* Name + description */}
+      {/* Name + account label */}
       <div className="space-y-1">
         <h3 className="text-sm font-semibold leading-tight">{definition.name}</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {definition.description}
-        </p>
+        {accountLabel ? (
+          <p className="text-xs text-muted-foreground leading-relaxed truncate" title={accountLabel}>
+            {accountLabel}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {definition.description}
+          </p>
+        )}
       </div>
 
       {/* Footer */}

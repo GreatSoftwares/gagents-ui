@@ -18,6 +18,20 @@ export interface IntegrationsTabProps {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function getCardKey(card: IntegrationCardData): string {
+  if (card.credentialId) {
+    return `${card.definition.slug}-cred-${card.credentialId}`;
+  }
+  if (card.isAddNew) {
+    return `${card.definition.slug}-add-new`;
+  }
+  return card.definition.slug;
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -47,15 +61,53 @@ export function IntegrationsTab({
     );
   }
 
+  // Split into connected/expired cards and add-new/coming-soon cards
+  const connectedCards = cards.filter(
+    (c) => !c.isAddNew && (c.state === "connected" || c.state === "expired"),
+  );
+  const otherCards = cards.filter(
+    (c) => c.isAddNew || c.state === "coming_soon",
+  );
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {cards.map((card) => (
-        <IntegrationCard
-          key={card.definition.slug}
-          card={card}
-          onConnect={onConnect}
-        />
-      ))}
+    <div className="space-y-6">
+      {/* Connected accounts */}
+      {connectedCards.length > 0 && (
+        <div>
+          <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Contas conectadas
+          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {connectedCards.map((card) => (
+              <IntegrationCard
+                key={getCardKey(card)}
+                card={card}
+                onConnect={onConnect}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add new / coming soon */}
+      {otherCards.length > 0 && (
+        <div>
+          {connectedCards.length > 0 && (
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Adicionar integração
+            </h3>
+          )}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {otherCards.map((card) => (
+              <IntegrationCard
+                key={getCardKey(card)}
+                card={card}
+                onConnect={onConnect}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

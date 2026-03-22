@@ -100,6 +100,8 @@ export interface ToolCredential {
   id: number;
   id_account: number;
   id_tool: number;
+  id_platform_integration: number | null;
+  external_reference: string | null;
   label: string;
   credentials_encrypted: string;
   expires_at: string | null;

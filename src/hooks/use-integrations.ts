@@ -32,6 +32,12 @@ export interface IntegrationCardData {
   sharedByAgentsCount: number;
   /** Whether this agent has a linked agent_tool for this integration */
   linkedToAgent: boolean;
+  /** Credential ID — set for connected/expired cards, undefined for "add new" */
+  credentialId?: number;
+  /** Account label (email or label from credential) */
+  accountLabel?: string;
+  /** Whether this is the "add new account" card */
+  isAddNew?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -42,6 +48,11 @@ export interface IntegrationCardData {
  * Cross-references the static integrations registry with live data
  * (tools, tool_credentials, agent_tools) to produce card state for each
  * integration entry.
+ *
+ * Returns:
+ * - One card per existing credential (connected/expired)
+ * - One "add new" card per integration type
+ * - Coming soon cards as before
  */
 export function useIntegrationState(
   config: GagentsHookConfig,
@@ -62,52 +73,88 @@ export function useIntegrationState(
     const tools: Tool[] = toolsData?.data ?? [];
     const agentTools: AgentTool[] = agentToolsData?.data ?? [];
 
-    return INTEGRATIONS_REGISTRY.map((def) => {
+    const result: IntegrationCardData[] = [];
+
+    for (const def of INTEGRATIONS_REGISTRY) {
       // coming_soon short-circuit
       if (def.status === "coming_soon") {
-        return {
+        result.push({
           definition: def,
           state: "coming_soon" as const,
           credential: null,
           tool: null,
           sharedByAgentsCount: 0,
           linkedToAgent: false,
-        };
+        });
+        continue;
       }
 
       // Find tool record matching registry slug
       const matchedTool = tools.find((t) => t.slug === def.slug) ?? null;
 
-      // Find credential for that tool
-      const matchedCredential = matchedTool
-        ? credentials.find((c) => c.id_tool === matchedTool.id) ?? null
-        : null;
+      // Find ALL credentials for this integration
+      // Credentials can be linked via id_tool OR id_platform_integration
+      // We match by tool slug through the tool record
+      const matchedCredentials = matchedTool
+        ? credentials.filter((c) => c.id_tool === matchedTool.id)
+        : [];
+
+      // Also check credentials linked via platform_integration slug
+      // (platform_integrations use the same slug convention)
+      const piCredentials = credentials.filter(
+        (c) =>
+          c.id_platform_integration != null &&
+          !c.id_tool &&
+          // We can't directly match slug here since we don't have
+          // platform_integrations data, but credentials with
+          // id_platform_integration are for calendar integrations
+          // which match by the registry slug
+          matchedTool == null,
+      );
+
+      // Combine — prefer tool-based credentials, fallback to PI-based
+      const allCredentials =
+        matchedCredentials.length > 0 ? matchedCredentials : piCredentials;
 
       // Check if this agent has a linked agent_tool for this tool
       const linkedToAgent = matchedTool
         ? agentTools.some((at) => at.id_tool === matchedTool.id)
         : false;
 
-      // Sharing indicator: credential exists at account level (available to all agents)
-      // When a credential is account-scoped, any agent can use it — show as "shared"
-      const sharedByAgentsCount = matchedCredential ? 1 : 0;
+      // Create one card per existing credential
+      for (const cred of allCredentials) {
+        const state: IntegrationCardState =
+          cred.status === "expired" ? "expired" : "connected";
 
-      // Determine state
-      let state: IntegrationCardState = "available";
-      if (matchedCredential) {
-        state =
-          matchedCredential.status === "expired" ? "expired" : "connected";
+        // Derive account label from external_reference or label
+        const accountLabel =
+          cred.external_reference || cred.label || undefined;
+
+        result.push({
+          definition: def,
+          state,
+          credential: cred,
+          tool: matchedTool,
+          sharedByAgentsCount: 1,
+          linkedToAgent,
+          credentialId: cred.id,
+          accountLabel,
+        });
       }
 
-      return {
+      // Always add an "add new account" card for this integration type
+      result.push({
         definition: def,
-        state,
-        credential: matchedCredential,
+        state: "available" as const,
+        credential: null,
         tool: matchedTool,
-        sharedByAgentsCount,
-        linkedToAgent,
-      };
-    });
+        sharedByAgentsCount: 0,
+        linkedToAgent: false,
+        isAddNew: true,
+      });
+    }
+
+    return result;
   }, [credentialsData, toolsData, agentToolsData]);
 
   return { cards, isLoading };

@@ -225,10 +225,15 @@ export function IntegrationWizard({
 
     try {
       // 1. Get auth URL from backend
-      const response = await fetch(
-        `${gagentsApiUrl}/v1/${language}/${idWl}/accounts/${accountId}/oauth/authorize/${integration.slug}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // If reconnecting an existing credential, pass credential_id so the
+      // backend updates that specific credential instead of creating a new one.
+      let authorizeUrl = `${gagentsApiUrl}/v1/${language}/${idWl}/accounts/${accountId}/oauth/authorize/${integration.slug}`;
+      if (existingCredentialId) {
+        authorizeUrl += `?credential_id=${existingCredentialId}`;
+      }
+      const response = await fetch(authorizeUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const result = await response.json();
 
       if (result.status !== 1 || !result.data?.auth_url) {
