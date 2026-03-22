@@ -1,9 +1,28 @@
 'use client';
 
+import { useCallback } from "react";
 import type { GagentsHookConfig } from "../../hooks/types";
-import { useIntegrationState, type IntegrationCardData } from "../../hooks/use-integrations";
-import { IntegrationCard } from "./integration-card";
+import { useIntegrationState } from "../../hooks/use-integrations";
+import { useAgentTools, useAddAgentTool, useRemoveAgentTool } from "../../hooks/use-agent-tools";
+import { useTools } from "../../hooks/use-tools";
+import { Switch, Tooltip, TooltipContent, TooltipTrigger } from "@greatapps/greatauth-ui/ui";
 import { Plug, Loader2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { CalendarSync } from "lucide-react";
+import { cn } from "../../lib";
+
+// ---------------------------------------------------------------------------
+// Icon mapping
+// ---------------------------------------------------------------------------
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  CalendarSync,
+  Plug,
+};
+
+function resolveIcon(name: string): LucideIcon {
+  return ICON_MAP[name] ?? Plug;
+}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -11,24 +30,7 @@ import { Plug, Loader2 } from "lucide-react";
 
 export interface IntegrationsTabProps {
   config: GagentsHookConfig;
-  agentId: number | null;
-  /** Called when user clicks a card action (connect / configure / reconnect).
-   *  The consuming app wires this to the wizard (Story 18.9). */
-  onConnect: (card: IntegrationCardData) => void;
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function getCardKey(card: IntegrationCardData): string {
-  if (card.credentialId) {
-    return `${card.definition.slug}-cred-${card.credentialId}`;
-  }
-  if (card.isAddNew) {
-    return `${card.definition.slug}-add-new`;
-  }
-  return card.definition.slug;
+  agentId: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -38,12 +40,46 @@ function getCardKey(card: IntegrationCardData): string {
 export function IntegrationsTab({
   config,
   agentId,
-  onConnect,
 }: IntegrationsTabProps) {
-  const { cards, isLoading } = useIntegrationState(config, agentId);
+  const { cards, isLoading } = useIntegrationState(config, null);
+  const { data: toolsData } = useTools(config);
+  const { data: agentToolsData, isLoading: agentToolsLoading } = useAgentTools(config, agentId);
+  const addAgentTool = useAddAgentTool(config);
+  const removeAgentTool = useRemoveAgentTool(config);
+
+  const tools = toolsData?.data ?? [];
+  const agentTools = agentToolsData?.data ?? [];
+
+  // Only show connected credentials (account-level)
+  const connectedCards = cards.filter(
+    (c) => !c.isAddNew && (c.state === "connected" || c.state === "expired"),
+  );
+
+  const handleToggle = useCallback(
+    (credentialId: number, toolSlug: string, checked: boolean) => {
+      // Find the tool record matching this integration slug
+      const tool = tools.find((t) => t.slug === toolSlug);
+      if (!tool) return;
+
+      if (checked) {
+        // Add agent_tool linking this agent to this tool
+        addAgentTool.mutate({
+          idAgent: agentId,
+          body: { id_tool: tool.id, enabled: true },
+        });
+      } else {
+        // Find the agent_tool to remove
+        const agentTool = agentTools.find((at) => at.id_tool === tool.id);
+        if (agentTool) {
+          removeAgentTool.mutate({ idAgent: agentId, id: agentTool.id });
+        }
+      }
+    },
+    [tools, agentTools, agentId, addAgentTool, removeAgentTool],
+  );
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || agentToolsLoading) {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -51,63 +87,82 @@ export function IntegrationsTab({
     );
   }
 
-  // Empty state
-  if (cards.length === 0) {
+  // Empty state — no integrations connected at account level
+  if (connectedCards.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
         <Plug className="h-10 w-10" />
-        <p className="text-sm">Nenhuma integração disponível</p>
+        <p className="text-sm font-medium">Nenhuma integração conectada</p>
+        <p className="text-xs text-center max-w-sm">
+          Conecte integrações na página de Integrações da conta para que possam
+          ser ativadas neste agente.
+        </p>
       </div>
     );
   }
 
-  // Split into connected/expired cards and add-new/coming-soon cards
-  const connectedCards = cards.filter(
-    (c) => !c.isAddNew && (c.state === "connected" || c.state === "expired"),
-  );
-  const otherCards = cards.filter(
-    (c) => c.isAddNew || c.state === "coming_soon",
-  );
-
   return (
-    <div className="space-y-6">
-      {/* Connected accounts */}
-      {connectedCards.length > 0 && (
-        <div>
-          <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Contas conectadas
-          </h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {connectedCards.map((card) => (
-              <IntegrationCard
-                key={getCardKey(card)}
-                card={card}
-                onConnect={onConnect}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Ative ou desative as integrações conectadas na conta para este agente.
+      </p>
 
-      {/* Add new / coming soon */}
-      {otherCards.length > 0 && (
-        <div>
-          {connectedCards.length > 0 && (
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Adicionar integração
-            </h3>
-          )}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {otherCards.map((card) => (
-              <IntegrationCard
-                key={getCardKey(card)}
-                card={card}
-                onConnect={onConnect}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {connectedCards.map((card) => {
+          const Icon = resolveIcon(card.definition.icon);
+          const tool = tools.find((t) => t.slug === card.definition.slug);
+          const isLinked = tool
+            ? agentTools.some((at) => at.id_tool === tool.id)
+            : false;
+          const isMutating = addAgentTool.isPending || removeAgentTool.isPending;
+
+          return (
+            <div
+              key={`${card.definition.slug}-cred-${card.credentialId}`}
+              className={cn(
+                "flex items-center gap-3 rounded-xl border bg-card p-4 transition-shadow",
+                isLinked ? "border-primary/30 shadow-sm" : "opacity-75",
+              )}
+            >
+              {/* Icon */}
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Icon className="h-4.5 w-4.5" />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-medium leading-tight truncate">
+                  {card.definition.name}
+                </h4>
+                {card.accountLabel && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xs text-muted-foreground truncate" title={card.accountLabel}>
+                        {card.accountLabel}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>{card.accountLabel}</TooltipContent>
+                  </Tooltip>
+                )}
+                {card.state === "expired" && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">Expirado</p>
+                )}
+              </div>
+
+              {/* Toggle */}
+              <Switch
+                checked={isLinked}
+                disabled={isMutating}
+                onCheckedChange={(checked) =>
+                  card.credentialId &&
+                  handleToggle(card.credentialId, card.definition.slug, checked)
+                }
+                aria-label={`${isLinked ? "Desativar" : "Ativar"} ${card.definition.name} para este agente`}
               />
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
