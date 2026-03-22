@@ -3,8 +3,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Tool, ToolCredential } from "../../types";
 import type { GagentsHookConfig } from "../../hooks/types";
 import {
-  useCreateToolCredential,
-  useUpdateToolCredential,
   useDeleteToolCredential,
 } from "../../hooks";
 import { useTools } from "../../hooks";
@@ -16,11 +14,6 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,13 +22,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@greatapps/greatauth-ui/ui";
-import { Trash2, Pencil, Link, Search } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -45,8 +33,6 @@ interface ToolCredentialsFormProps {
   isLoading: boolean;
   config: GagentsHookConfig;
   gagentsApiUrl: string;
-  createOpen?: boolean;
-  onCreateOpenChange?: (open: boolean) => void;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -56,20 +42,12 @@ function formatDate(dateStr: string | null): string {
 
 function useColumns(
   tools: Tool[],
-  onEdit: (cred: ToolCredential) => void,
-  onConnect: (cred: ToolCredential) => void,
   onRemove: (cred: ToolCredential) => void,
 ): ColumnDef<ToolCredential>[] {
   function getToolName(idTool: number | null): string {
     if (!idTool) return "\u2014";
     const tool = tools.find((t) => t.id === idTool);
     return tool?.name || `Ferramenta #${idTool}`;
-  }
-
-  function getToolType(idTool: number | null): string | null {
-    if (!idTool) return null;
-    const tool = tools.find((t) => t.id === idTool);
-    return tool?.type || null;
   }
 
   return [
@@ -123,36 +101,6 @@ function useColumns(
       enableSorting: false,
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          {getToolType(row.original.id_tool) === "oauth2" && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  aria-label="Vincular"
-                  disabled
-                >
-                  <Link className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Em breve</TooltipContent>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                aria-label="Editar"
-                onClick={() => onEdit(row.original)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Editar</TooltipContent>
-          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -178,35 +126,12 @@ export function ToolCredentialsForm({
   isLoading,
   config,
   gagentsApiUrl,
-  createOpen: externalCreateOpen,
-  onCreateOpenChange,
 }: ToolCredentialsFormProps) {
-  const createMutation = useCreateToolCredential(config);
-  const updateMutation = useUpdateToolCredential(config);
   const deleteMutation = useDeleteToolCredential(config);
   const { data: toolsData } = useTools(config);
   const tools: Tool[] = (toolsData?.data || []).filter((t: Tool) => !t.slug?.startsWith("gclinic_"));
 
   const [search, setSearch] = useState("");
-  const [internalCreateOpen, setInternalCreateOpen] = useState(false);
-  const showCreateDialog = externalCreateOpen ?? internalCreateOpen;
-  const setShowCreateDialog = onCreateOpenChange ?? setInternalCreateOpen;
-  const [createForm, setCreateForm] = useState({
-    id_tool: "",
-    label: "",
-    credentials_encrypted: "",
-    expires_at: "",
-  });
-
-  const [editTarget, setEditTarget] = useState<ToolCredential | null>(null);
-  const [editForm, setEditForm] = useState({
-    id_tool: "",
-    label: "",
-    credentials_encrypted: "",
-    expires_at: "",
-    status: "" as "active" | "expired" | "",
-  });
-
   const [removeTarget, setRemoveTarget] = useState<ToolCredential | null>(null);
 
   // Build a set of internal tool IDs to exclude from credentials display
@@ -237,85 +162,8 @@ export function ToolCredentialsForm({
 
   const columns = useColumns(
     tools,
-    (cred) => startEdit(cred),
-    (cred) => handleConnect(cred),
     (cred) => setRemoveTarget(cred),
   );
-
-  async function handleCreate() {
-    const idTool = parseInt(createForm.id_tool, 10);
-    if (!idTool || !createForm.label.trim() || !createForm.credentials_encrypted.trim()) return;
-
-    try {
-      const result = await createMutation.mutateAsync({
-        id_tool: idTool,
-        label: createForm.label.trim(),
-        credentials_encrypted: createForm.credentials_encrypted.trim(),
-        ...(createForm.expires_at ? { expires_at: createForm.expires_at } : {}),
-      });
-      if (result.status === 1) {
-        toast.success("Credencial criada");
-        setShowCreateDialog(false);
-        setCreateForm({ id_tool: "", label: "", credentials_encrypted: "", expires_at: "" });
-      } else {
-        toast.error(result.message || "Erro ao criar credencial");
-      }
-    } catch {
-      toast.error("Erro ao criar credencial");
-    }
-  }
-
-  function startEdit(cred: ToolCredential) {
-    setEditTarget(cred);
-    setEditForm({
-      id_tool: cred.id_tool ? String(cred.id_tool) : "",
-      label: cred.label || "",
-      credentials_encrypted: "",
-      expires_at: cred.expires_at || "",
-      status: cred.status,
-    });
-  }
-
-  async function handleSaveEdit() {
-    if (!editTarget) return;
-    const body: Record<string, unknown> = {};
-    const newIdTool = editForm.id_tool ? parseInt(editForm.id_tool, 10) : null;
-    if (newIdTool && newIdTool !== editTarget.id_tool) {
-      body.id_tool = newIdTool;
-    }
-    if (editForm.label.trim() && editForm.label.trim() !== (editTarget.label || "")) {
-      body.label = editForm.label.trim();
-    }
-    if (editForm.credentials_encrypted.trim()) {
-      body.credentials_encrypted = editForm.credentials_encrypted.trim();
-    }
-    if (editForm.expires_at !== (editTarget.expires_at || "")) {
-      body.expires_at = editForm.expires_at || null;
-    }
-    if (editForm.status && editForm.status !== editTarget.status) {
-      body.status = editForm.status;
-    }
-
-    if (Object.keys(body).length === 0) {
-      setEditTarget(null);
-      return;
-    }
-
-    try {
-      const result = await updateMutation.mutateAsync({
-        id: editTarget.id,
-        body: body as Parameters<typeof updateMutation.mutateAsync>[0]["body"],
-      });
-      if (result.status === 1) {
-        toast.success("Credencial atualizada");
-        setEditTarget(null);
-      } else {
-        toast.error(result.message || "Erro ao atualizar credencial");
-      }
-    } catch {
-      toast.error("Erro ao atualizar credencial");
-    }
-  }
 
   async function handleRemove() {
     if (!removeTarget) return;
@@ -331,14 +179,6 @@ export function ToolCredentialsForm({
     } finally {
       setRemoveTarget(null);
     }
-  }
-
-  function handleConnect(cred: ToolCredential) {
-    if (!config.accountId || !config.token) return;
-    const language = config.language ?? "pt-br";
-    const idWl = config.idWl ?? 1;
-    const url = `${gagentsApiUrl}/v1/${language}/${idWl}/accounts/${config.accountId}/oauth/connect?id_tool=${cred.id_tool}`;
-    window.open(url, "_blank");
   }
 
   return (
@@ -364,219 +204,6 @@ export function ToolCredentialsForm({
         isLoading={isLoading}
         emptyMessage="Nenhuma credencial encontrada"
       />
-
-      {/* Create Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nova Credencial</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="cred-tool" className="mb-1 block text-sm font-medium">
-                Ferramenta *
-              </label>
-              <Select
-                value={createForm.id_tool}
-                onValueChange={(val) =>
-                  setCreateForm((f) => ({ ...f, id_tool: val }))
-                }
-              >
-                <SelectTrigger id="cred-tool">
-                  <SelectValue placeholder="Selecione a ferramenta" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tools.map((tool) => (
-                    <SelectItem key={tool.id} value={String(tool.id)}>
-                      {tool.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label htmlFor="cred-label" className="mb-1 block text-sm font-medium">
-                Label *
-              </label>
-              <Input
-                id="cred-label"
-                name="label"
-                value={createForm.label}
-                onChange={(e) =>
-                  setCreateForm((f) => ({ ...f, label: e.target.value }))
-                }
-                placeholder="Ex: Google Calendar - Clínica São Paulo"
-              />
-            </div>
-            <div>
-              <label htmlFor="cred-credential" className="mb-1 block text-sm font-medium">
-                Credencial *
-              </label>
-              <Input
-                id="cred-credential"
-                name="credential"
-                autoComplete="off"
-                type="password"
-                value={createForm.credentials_encrypted}
-                onChange={(e) =>
-                  setCreateForm((f) => ({
-                    ...f,
-                    credentials_encrypted: e.target.value,
-                  }))
-                }
-                placeholder="Credencial encriptada"
-              />
-            </div>
-            <div>
-              <label htmlFor="cred-expires" className="mb-1 block text-sm font-medium">
-                Data de Expiração (opcional)
-              </label>
-              <Input
-                id="cred-expires"
-                name="expires"
-                type="date"
-                value={createForm.expires_at}
-                onChange={(e) =>
-                  setCreateForm((f) => ({ ...f, expires_at: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowCreateDialog(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={
-                !createForm.id_tool ||
-                !createForm.label.trim() ||
-                !createForm.credentials_encrypted.trim() ||
-                createMutation.isPending
-              }
-            >
-              Criar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog
-        open={!!editTarget}
-        onOpenChange={(open) => !open && setEditTarget(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Credencial</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="edit-cred-tool" className="mb-1 block text-sm font-medium">
-                Ferramenta *
-              </label>
-              <Select
-                value={editForm.id_tool}
-                onValueChange={(val) =>
-                  setEditForm((f) => ({ ...f, id_tool: val }))
-                }
-              >
-                <SelectTrigger id="edit-cred-tool">
-                  <SelectValue placeholder="Selecione a ferramenta" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tools.map((tool) => (
-                    <SelectItem key={tool.id} value={String(tool.id)}>
-                      {tool.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label htmlFor="edit-cred-label" className="mb-1 block text-sm font-medium">
-                Label
-              </label>
-              <Input
-                id="edit-cred-label"
-                name="label"
-                value={editForm.label}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, label: e.target.value }))
-                }
-                placeholder="Label da credencial"
-              />
-            </div>
-            <div>
-              <label htmlFor="edit-cred-credential" className="mb-1 block text-sm font-medium">
-                Nova Credencial (vazio = manter atual)
-              </label>
-              <Input
-                id="edit-cred-credential"
-                name="credential"
-                autoComplete="off"
-                type="password"
-                value={editForm.credentials_encrypted}
-                onChange={(e) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    credentials_encrypted: e.target.value,
-                  }))
-                }
-                placeholder="Nova credencial"
-              />
-            </div>
-            <div>
-              <label htmlFor="edit-cred-expires" className="mb-1 block text-sm font-medium">
-                Data de Expiração
-              </label>
-              <Input
-                id="edit-cred-expires"
-                name="expires"
-                type="date"
-                value={editForm.expires_at}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, expires_at: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label htmlFor="edit-cred-status" className="mb-1 block text-sm font-medium">Status</label>
-              <Select
-                value={editForm.status || undefined}
-                onValueChange={(val) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    status: val as "active" | "expired",
-                  }))
-                }
-              >
-                <SelectTrigger id="edit-cred-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="expired">Expirado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTarget(null)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveEdit}
-              disabled={updateMutation.isPending}
-            >
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete confirmation */}
       <AlertDialog

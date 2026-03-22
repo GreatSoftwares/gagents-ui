@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import type { GagentsHookConfig } from "../../hooks/types";
 import { useIntegrationState } from "../../hooks/use-integrations";
 import { useAgentTools, useAddAgentTool, useRemoveAgentTool } from "../../hooks/use-agent-tools";
-import { useTools } from "../../hooks/use-tools";
 import { Switch, Tooltip, TooltipContent, TooltipTrigger } from "@greatapps/greatauth-ui/ui";
 import { Plug, Loader2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -41,13 +40,11 @@ export function IntegrationsTab({
   config,
   agentId,
 }: IntegrationsTabProps) {
-  const { cards, isLoading } = useIntegrationState(config, null);
-  const { data: toolsData } = useTools(config);
+  const { cards, isLoading } = useIntegrationState(config, agentId);
   const { data: agentToolsData, isLoading: agentToolsLoading } = useAgentTools(config, agentId);
   const addAgentTool = useAddAgentTool(config);
   const removeAgentTool = useRemoveAgentTool(config);
 
-  const tools = toolsData?.data ?? [];
   const agentTools = agentToolsData?.data ?? [];
 
   // Only show connected credentials (account-level)
@@ -56,26 +53,22 @@ export function IntegrationsTab({
   );
 
   const handleToggle = useCallback(
-    (credentialId: number, toolSlug: string, checked: boolean) => {
-      // Find the tool record matching this integration slug
-      const tool = tools.find((t) => t.slug === toolSlug);
-      if (!tool) return;
-
+    (toolId: number, checked: boolean) => {
       if (checked) {
         // Add agent_tool linking this agent to this tool
         addAgentTool.mutate({
           idAgent: agentId,
-          body: { id_tool: tool.id, enabled: true },
+          body: { id_tool: toolId, enabled: true },
         });
       } else {
         // Find the agent_tool to remove
-        const agentTool = agentTools.find((at) => at.id_tool === tool.id);
+        const agentTool = agentTools.find((at) => at.id_tool === toolId);
         if (agentTool) {
           removeAgentTool.mutate({ idAgent: agentId, id: agentTool.id });
         }
       }
     },
-    [tools, agentTools, agentId, addAgentTool, removeAgentTool],
+    [agentTools, agentId, addAgentTool, removeAgentTool],
   );
 
   // Loading state
@@ -110,10 +103,7 @@ export function IntegrationsTab({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {connectedCards.map((card) => {
           const Icon = resolveIcon(card.definition.icon);
-          const tool = tools.find((t) => t.slug === card.definition.slug);
-          const isLinked = tool
-            ? agentTools.some((at) => at.id_tool === tool.id)
-            : false;
+          const isLinked = card.linkedToAgent;
           const isMutating = addAgentTool.isPending || removeAgentTool.isPending;
 
           return (
@@ -152,10 +142,9 @@ export function IntegrationsTab({
               {/* Toggle */}
               <Switch
                 checked={isLinked}
-                disabled={isMutating}
+                disabled={isMutating || !card.tool}
                 onCheckedChange={(checked) =>
-                  card.credentialId &&
-                  handleToggle(card.credentialId, card.definition.slug, checked)
+                  card.tool && handleToggle(card.tool.id, checked)
                 }
                 aria-label={`${isLinked ? "Desativar" : "Ativar"} ${card.definition.name} para este agente`}
               />

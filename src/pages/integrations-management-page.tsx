@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useToolCredentials, useAgents, useTools } from "../hooks";
 import { ToolCredentialsForm } from "../components/tools/tool-credentials-form";
 import { IntegrationCard } from "../components/capabilities/integration-card";
@@ -16,7 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@greatapps/greatauth-ui/ui";
-import { Plus, Plug, KeyRound, Info, Loader2 } from "lucide-react";
+import { Plug, KeyRound, Info, Loader2 } from "lucide-react";
 import type { GagentsHookConfig } from "../hooks/types";
 import type { Agent, Tool, ToolCredential } from "../types";
 
@@ -72,8 +72,6 @@ export function IntegrationsManagementPage({
     useToolCredentials(config);
   const { data: agentsData } = useAgents(config);
   const { data: toolsData } = useTools(config);
-  const [createOpen, setCreateOpen] = useState(false);
-
   // Integration cards state (account-level, agentId=null)
   const { cards, isLoading: cardsLoading } = useIntegrationState(config, null);
 
@@ -237,20 +235,11 @@ export function IntegrationsManagementPage({
             </div>
           )}
 
-          <div className="flex items-center justify-end mb-4">
-            <Button onClick={() => setCreateOpen(true)} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Credencial
-            </Button>
-          </div>
-
           <ToolCredentialsForm
             config={config}
             gagentsApiUrl={gagentsApiUrl}
             credentials={credentials}
             isLoading={credentialsLoading}
-            createOpen={createOpen}
-            onCreateOpenChange={setCreateOpen}
           />
         </TabsContent>
       </Tabs>

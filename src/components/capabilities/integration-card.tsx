@@ -1,13 +1,12 @@
 'use client';
 
 import type { IntegrationCardData, IntegrationCardState } from "../../hooks/use-integrations";
-import { Badge, Button, Tooltip, TooltipContent, TooltipTrigger } from "@greatapps/greatauth-ui/ui";
+import { Badge, Button } from "@greatapps/greatauth-ui/ui";
 import {
   CalendarSync,
   Plug,
   Settings,
   RefreshCw,
-  Users,
   Clock,
   Plus,
 } from "lucide-react";
@@ -23,7 +22,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Plug,
   Settings,
   RefreshCw,
-  Users,
   Clock,
   Plus,
 };
@@ -84,7 +82,7 @@ export interface IntegrationCardProps {
 }
 
 export function IntegrationCard({ card, onConnect }: IntegrationCardProps) {
-  const { definition, state, sharedByAgentsCount, isAddNew, accountLabel } = card;
+  const { definition, state, isAddNew, accountLabel } = card;
   const Icon = resolveIcon(definition.icon);
   const isComingSoon = state === "coming_soon";
   const actionLabel = getActionLabel(card);
@@ -195,23 +193,7 @@ export function IntegrationCard({ card, onConnect }: IntegrationCardProps) {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-        {sharedByAgentsCount > 0 ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                <Users className="h-3.5 w-3.5" />
-                Compartilhada
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>
-              Esta credencial está disponível para todos os agentes da conta
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <span />
-        )}
-
+      <div className="mt-auto flex items-center justify-end gap-2 pt-1">
         {!isComingSoon && (
           <Button
             variant={state === "expired" ? "destructive" : "outline"}

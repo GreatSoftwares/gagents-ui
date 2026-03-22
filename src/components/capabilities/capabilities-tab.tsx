@@ -25,7 +25,7 @@ import {
   Skeleton,
 } from "@greatapps/greatauth-ui/ui";
 import {
-  Calendar,
+  CalendarCheck,
   Users,
   Settings,
   HeartHandshake,
@@ -55,7 +55,7 @@ function getOperationLabel(slug: string): string {
 // ---------------------------------------------------------------------------
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  agenda: Calendar,
+  agenda: CalendarCheck,
   cadastros: Users,
   infraestrutura: Settings,
   relacionamentos: HeartHandshake,
